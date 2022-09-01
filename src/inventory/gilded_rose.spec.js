@@ -1,3 +1,4 @@
+import { it } from 'node:test';
 import { Item, updateQuality } from './gilded_rose';
 
 describe('`updateQuality`', () => {
@@ -14,38 +15,19 @@ describe('`updateQuality`', () => {
     expect(standardItem.quality).toBe(9);
   });
 
-  it('deprecates the quality of standard items by 2 while sell in is <0', () => {
-    standardItem = new Item('Haunted Shoe', 0, 10);
-    updateQuality([standardItem]);
-    expect(standardItem.quality).toBe(8);
-  });
-
-  //Legendary items do not have sell by dates or decrease in quality.
-  //I am unsure if they are also supposed to have quality >50, as shown here.
-  it('does not lower the quality of a Hand of Ragnaros', () => {
+  //Legendary items' sell_in values should not change and they should not decrease in quality.
+  it('does not lower the quality or sell_in of a Hand of Ragnaros', () => {
     legendaryItem = new Item('Sulfuras, Hand of Ragnaros', 0, 80);
     updateQuality([legendaryItem]);
     expect(legendaryItem.quality).toBe(80);
+    expect(legendaryItem.sell_in).toBe(80);
   })
 
-  //Aged Brie is meant to increase in quality as sell by decreases. It 
-  //should cap at 50 quality.
-  it('increments the quality of aged brie by 1 as sell-in decreases', () => {
+  //Aged Brie is meant to increase in quality as sell_in decreases.
+  it('increments the quality of aged brie by 1 as sell_in decreases', () => {
     cheeseItem = new Item('Aged Brie', 10, 10);
     updateQuality([cheeseItem]);
     expect(cheeseItem.quality).toBe(11);
-  })
-
-  it('increments the quality of aged brie by 2 when sell-in <0', () => {
-    cheeseItem = new Item('Aged Brie', 0, 10);
-    updateQuality([cheeseItem]);
-    expect(cheeseItem.quality).toBe(12);
-  })
-
-  it('cannot increment the quality of aged brie once it is 50', () => {
-    cheeseItem = new Item('Aged Brie', 50, 50);
-    updateQuality([cheeseItem]);
-    expect(cheeseItem.quality).toBe(50);
   })
 
   //Tickets go up by 2 quality once sell-in <=10, but their quality is locked 
@@ -83,4 +65,26 @@ describe('`updateQuality`', () => {
     expect(legendaryItem.quality).toBe(0);
   })
 
+  //Quality caps at 50; Initial value can be >50, however.
+  it('does not increment quality above 50 for any appreciating items', () => {
+    cheeseItem = new Item('Aged Brie', 50, 50);
+    ticketItem = new Item('Backstage passes to a TAFKAL80ETC concert', 50, 50);
+
+    updateQuality([cheeseItem,ticketItem])
+
+    expect(cheeseItem.quality).toBe(50);
+    expect(ticketItem.quality).toBe(50);
+  })
+
+  //Changes in quality double past sell_in date; note that
+  //this behavior is overridden for legendary items and tickets
+  it('doubles changes in quality when sell_in is <0', () => {
+    standardItem = new Item('Haunted Shoe', 0, 10);
+    cheeseItem = new Item('Aged Brie', 0, 0);
+
+    updateQuality([standardItem, cheeseItem]);
+
+    expect(standardItem.quality).toBe(8);
+    expect(cheeseItem.quality).toBe(2);
+  })
 });
