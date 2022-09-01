@@ -1,4 +1,3 @@
-import { it } from 'node:test';
 import { Item, updateQuality } from './gilded_rose';
 
 describe('`updateQuality`', () => {
@@ -20,7 +19,7 @@ describe('`updateQuality`', () => {
     legendaryItem = new Item('Sulfuras, Hand of Ragnaros', 0, 80);
     updateQuality([legendaryItem]);
     expect(legendaryItem.quality).toBe(80);
-    expect(legendaryItem.sell_in).toBe(80);
+    expect(legendaryItem.sell_in).toBe(0);
   })
 
   //Aged Brie is meant to increase in quality as sell_in decreases.
