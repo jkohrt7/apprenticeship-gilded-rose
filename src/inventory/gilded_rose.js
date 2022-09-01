@@ -21,50 +21,66 @@ const items = [
 
 updateQuality(items);
 */
-export function updateQuality(items) {
+
+/* Limits quality to values between 0 and 50 */
+function limitQuality(quality) {
+  if(quality < 0) {
+    return 0;
+  }
+  else if (quality > 50) {
+    return 50;
+  }
+  return quality;
+}
+
+//Helper function that  
+function getQualityModifier(sell_in) {
+  if (sell_in < 0) {
+    return 2;
+  }
+  return 1;
+}
+
+export function updateItems(items) {
+  const specialItems = ['Aged Brie', 
+                        'Backstage passes to a TAFKAL80ETC concert', 
+                        'Sulfuras, Hand of Ragnaros']
+
+  let oldItemModifier;
+  
+  //Check each item in inventory
   for (var i = 0; i < items.length; i++) {
-    if (items[i].name != 'Aged Brie' && items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-      if (items[i].quality > 0) {
-        if (items[i].name != 'Sulfuras, Hand of Ragnaros') {
-          items[i].quality = items[i].quality - 1
-        }
-      }
-    } else {
-      if (items[i].quality < 50) {
-        items[i].quality = items[i].quality + 1
-        if (items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-          if (items[i].sell_in < 11) {
-            if (items[i].quality < 50) {
-              items[i].quality = items[i].quality + 1
-            }
-          }
-          if (items[i].sell_in < 6) {
-            if (items[i].quality < 50) {
-              items[i].quality = items[i].quality + 1
-            }
-          }
-        }
-      }
+    //Items with sell_in < 0 have all their quality changes doubled.
+    items[i].sell_in -= 1;
+    oldItemModifier = getQualityModifier(items[i].sell_in);
+
+    //Standard item; drops in sell-in and quality.
+    if(!specialItems.includes(items[i].name)){
+      items[i].quality -= 1 * oldItemModifier;
+      items[i].quality = limitQuality(items[i].quality)
+      
     }
-    if (items[i].name != 'Sulfuras, Hand of Ragnaros') {
-      items[i].sell_in = items[i].sell_in - 1;
+
+    //Cheese item; gains quality over time
+    else if(items[i].name == 'Aged Brie') {
+      items[i].quality += 1 * oldItemModifier;
+      items[i].quality = limitQuality(items[i].quality);
     }
-    if (items[i].sell_in < 0) {
-      if (items[i].name != 'Aged Brie') {
-        if (items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-          if (items[i].quality > 0) {
-            if (items[i].name != 'Sulfuras, Hand of Ragnaros') {
-              items[i].quality = items[i].quality - 1
-            }
-          }
-        } else {
-          items[i].quality = items[i].quality - items[i].quality
-        }
-      } else {
-        if (items[i].quality < 50) {
-          items[i].quality = items[i].quality + 1
-        }
+
+    //ticket item; has 2 unique modifiers for quality
+    else if (items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
+      if(items[i].sell_in < 0) {
+        items[i].quality = 0;
+        oldItemModifier = 0;
       }
+      else if (items[i].sell_in <= 10) {
+        oldItemModifier = 2;
+      }
+      items[i].quality += 1 * oldItemModifier;
+      items[i].quality = limitQuality(items[i].quality);
+    }
+    else {
+      console.log(items[i].name)
     }
   }
 }
