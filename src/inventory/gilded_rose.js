@@ -28,33 +28,56 @@ const strategies = {
   "Sulfuras, Hand of Ragnaros": legendaryUpdate
 }
 
-function defaultUpdate() {
+function defaultUpdate(item) {
+  let newItem = item; //TODO: hard copy instead.
+  newItem.sell_in -=1;
+  newItem.quality -=1;
 
+  if(newItem.sell_in < 0) newItem.quality -= 1;
+  if(newItem.quality < 0) newItem.quality = 0;
+
+  return newItem;
 }
 
-function cheeseUpdate() {
+function cheeseUpdate(item) {
+  let newItem = item; //TODO: hard copy instead.
+  newItem.sell_in -=1;
+  newItem.quality +=1;
 
+  if(newItem.sell_in < 0) newItem.quality += 1;
+  if(newItem.quality > 50) newItem.quality = 50;
+
+  return newItem;
 }
 
-function ticketUpdate() {
+function ticketUpdate(item) {
+  let newItem = item;
+  newItem.sell_in -=1;
+  newItem.quality +=1;
 
+  if(newItem.sell_in <= 10) newItem.quality += 1;
+  if(newItem.sell_in < 0) newItem.quality = 0;
+  if(newItem.quality > 50) newItem.quality = 50;
+
+  return newItem;
 }
 
-function legendaryUpdate() {
-
+function legendaryUpdate(item) {
+  //currently, legendary items do not change.
+  return item;
 }
 
 export function updateQuality(items) {
   //apply the strategy from an object literal with key function pairs.
   let updateFunction;
-  
+
   for (var i = 0; i < items.length; i++) {
-    updateFunction = strategies.items[i].name;
+    updateFunction = strategies[items[i].name];
     if(updateFunction) {
-      updateFunction();
+      items[i] = updateFunction(items[i]);
     }
     else {
-      defaultUpdate();
+      items[i] = defaultUpdate(items[i]);
     }
   }
 }
