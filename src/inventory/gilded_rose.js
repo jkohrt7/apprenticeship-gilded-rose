@@ -67,7 +67,7 @@ function legendaryUpdate(item) {
   return item;
 }
 
-export function updateQuality(items) {
+export function updateItems(items) {
   //apply the strategy from an object literal with key function pairs.
   let updateFunction;
 

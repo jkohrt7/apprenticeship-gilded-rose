@@ -1,4 +1,4 @@
-import { Item, updateQuality } from '../inventory/gilded_rose.js';
+import { Item, updateItems } from '../inventory/gilded_rose.js';
 
 const getNewItems = () => [
   new Item('+5 Dexterity Vest', 10, 20),
@@ -30,7 +30,7 @@ const bindEventListenToUpdateButton = (items) => {
   const updateButton = document.getElementById('update-items-button');
   updateButton.addEventListener('click', (e) => {
     e.preventDefault();
-    updateQuality(items);
+    updateItems(items);
     renderItemsOnHomepage(items);
   });
 };
