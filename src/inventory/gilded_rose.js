@@ -25,11 +25,12 @@ updateQuality(items);
 const strategies = {
   "Aged Brie": cheeseUpdate,
   "Backstage passes to a TAFKAL80ETC concert": ticketUpdate,
-  "Sulfuras, Hand of Ragnaros": legendaryUpdate
+  "Sulfuras, Hand of Ragnaros": legendaryUpdate,
+  "Conjured": conjuredUpdate
 }
 
 function defaultUpdate(item) {
-  let newItem = item; //TODO: hard copy instead.
+  let newItem = item; //TODO: hard copy instead? Omit?
   newItem.sell_in -=1;
   newItem.quality -=1;
 
@@ -40,7 +41,7 @@ function defaultUpdate(item) {
 }
 
 function cheeseUpdate(item) {
-  let newItem = item; //TODO: hard copy instead.
+  let newItem = item;
   newItem.sell_in -=1;
   newItem.quality +=1;
 
@@ -63,21 +64,32 @@ function ticketUpdate(item) {
 }
 
 function legendaryUpdate(item) {
-  //currently, legendary items do not change.
+  //currently, legendary items should not change.
   return item;
 }
 
+//WIP...conjured items mess up the strategy pattern.
+function conjuredUpdate(item) {
+  let newItem = item;
+  newItem.sell_in -=1;
+  newItem.quality -=2;
+
+  if(newItem.sell_in < 0) newItem.quality -= 2;
+  if(newItem.quality < 0) newItem.quality = 0;
+
+  return newItem;
+}
+
 export function updateItems(items) {
-  //apply the strategy from an object literal with key function pairs.
   let updateFunction;
+  let strategyName;
 
   for (var i = 0; i < items.length; i++) {
-    updateFunction = strategies[items[i].name];
-    if(updateFunction) {
-      items[i] = updateFunction(items[i]);
-    }
-    else {
-      items[i] = defaultUpdate(items[i]);
-    }
+    //Ugly temp code for passing tests.
+    //Maybe a 'getStrategy' function to futureproof?
+    strategyName = (items[i].name.startsWith("Conjured") ? "Conjured" : items[i].name);
+    //Below is what I had before "conjured"
+    updateFunction = strategies[strategyName] || defaultUpdate;
+    items[i] = updateFunction(items[i])
   }
 }
