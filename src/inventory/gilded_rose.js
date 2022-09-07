@@ -22,74 +22,47 @@ const items = [
 updateQuality(items);
 */
 
-const strategies = {
-  "Aged Brie": cheeseUpdate,
-  "Backstage passes to a TAFKAL80ETC concert": ticketUpdate,
-  "Sulfuras, Hand of Ragnaros": legendaryUpdate,
-  "Conjured": conjuredUpdate
+const qualityStrategies = {
+  "Aged Brie": item => Math.min(50, item.sell_in >=0 ? item.quality + 1 : item.quality + 2),
+  "Backstage passes to a TAFKAL80ETC concert": item => Math.min(50,getTicketQuality(item)),
+  "Sulfuras, Hand of Ragnaros": item => item.quality,
+  "Conjured": item => Math.max(0, item.sell_in >=0 ? (item.quality - 2) : (item.quality - 4)),
+  "default": item => Math.max(0,item.sell_in >=0 ? (item.quality - 1) : item.quality - 2)
 }
 
-function defaultUpdate(item) {
-  let newItem = item; //TODO: hard copy instead? Omit?
-  newItem.sell_in -=1;
-  newItem.quality -=1;
-
-  if(newItem.sell_in < 0) newItem.quality -= 1;
-  if(newItem.quality < 0) newItem.quality = 0;
-
-  return newItem;
+function calcNextSellIn(item) {
+  if(item.name != "Sulfuras, Hand of Ragnaros"){
+    return item.sell_in - 1;
+  }
+  return item.sell_in;
 }
 
-function cheeseUpdate(item) {
-  let newItem = item;
-  newItem.sell_in -=1;
-  newItem.quality +=1;
-
-  if(newItem.sell_in < 0) newItem.quality += 1;
-  if(newItem.quality > 50) newItem.quality = 50;
-
-  return newItem;
+function calcNextQuality(item) {
+  let strategyName;
+  if(item.name.startsWith("Conjured")) {
+    strategyName = "Conjured"
+  }
+  else {
+    strategyName = item.name;
+  }
+  let strategy = qualityStrategies[strategyName] || qualityStrategies["default"];
+  return strategy(item);
 }
 
-function ticketUpdate(item) {
-  let newItem = item;
-  newItem.sell_in -=1;
-  newItem.quality +=1;
-
-  if(newItem.sell_in <= 10) newItem.quality += 1;
-  if(newItem.sell_in < 0) newItem.quality = 0;
-  if(newItem.quality > 50) newItem.quality = 50;
-
-  return newItem;
-}
-
-function legendaryUpdate(item) {
-  //currently, legendary items should not change.
-  return item;
-}
-
-//WIP...conjured items mess up the strategy pattern.
-function conjuredUpdate(item) {
-  let newItem = item;
-  newItem.sell_in -=1;
-  newItem.quality -=2;
-
-  if(newItem.sell_in < 0) newItem.quality -= 2;
-  if(newItem.quality < 0) newItem.quality = 0;
-
-  return newItem;
+//Tickets have enough conditionals to merit a named function
+function getTicketQuality(item) {
+  if(item.sell_in <= 10 && item.sell_in >=0) {
+    return item.quality + 2;
+  }
+  if(item.sell_in > 10) {
+    return item.quality + 1;
+  }
+  return 0;
 }
 
 export function updateItems(items) {
-  let updateFunction;
-  let strategyName;
-
   for (var i = 0; i < items.length; i++) {
-    //Ugly temp code for passing tests.
-    //Maybe a 'getStrategy' function to futureproof?
-    strategyName = (items[i].name.startsWith("Conjured") ? "Conjured" : items[i].name);
-    //Below is what I had before "conjured"
-    updateFunction = strategies[strategyName] || defaultUpdate;
-    items[i] = updateFunction(items[i])
+    items[i].sell_in = calcNextSellIn(items[i]);
+    items[i].quality = calcNextQuality(items[i]); //need clamping
   }
 }
