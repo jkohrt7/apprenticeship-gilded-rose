@@ -23,11 +23,10 @@ updateQuality(items);
 */
 
 const qualityStrategies = {
-  "Aged Brie": item => Math.min(50, item.sell_in >=0 ? item.quality + 1 : item.quality + 2),
+  "Aged Brie": item => Math.min(50, commonGetQuality(item, 1)),
   "Backstage passes to a TAFKAL80ETC concert": item => Math.min(50,getTicketQuality(item)),
   "Sulfuras, Hand of Ragnaros": item => item.quality,
-  "Conjured": item => Math.max(0, item.sell_in >=0 ? (item.quality - 2) : (item.quality - 4)),
-  "default": item => Math.max(0,item.sell_in >=0 ? (item.quality - 1) : item.quality - 2)
+  "default": item => Math.max(0, commonGetQuality(item, -1))
 }
 
 function calcNextSellIn(item) {
@@ -49,7 +48,18 @@ function calcNextQuality(item) {
   return strategy(item);
 }
 
-//Tickets have enough conditionals to merit a named function
+//Most items follow this logic, with just changed values.
+function commonGetQuality(item, change) {
+  if(item.sell_in >= 0) {
+    return item.quality + change;
+  }
+  else {
+    return item.quality + change * 2;
+  }
+}
+
+//Tickets have enough conditionals to merit a named function.
+//Normally I'd use subclasses/polymorphism for this, but...goblins.
 function getTicketQuality(item) {
   if(item.sell_in <= 10 && item.sell_in >=0) {
     return item.quality + 2;
@@ -63,6 +73,6 @@ function getTicketQuality(item) {
 export function updateItems(items) {
   for (var i = 0; i < items.length; i++) {
     items[i].sell_in = calcNextSellIn(items[i]);
-    items[i].quality = calcNextQuality(items[i]); //need clamping
+    items[i].quality = calcNextQuality(items[i]);
   }
 }

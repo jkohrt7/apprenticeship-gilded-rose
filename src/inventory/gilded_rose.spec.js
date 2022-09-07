@@ -86,23 +86,4 @@ describe('`updateItems`', () => {
     updateItems([ticketItem]);
     expect(ticketItem.quality).toBe(0);
   })
-
-  //Conjured items degrade twice as fast
-  it('deprecates the quality of a conjured item by 2 when sell-in >=0', () => {
-    const conjuredItem = new Item('Conjured fire scroll', 1, 10);
-    updateItems([conjuredItem]);
-    expect(conjuredItem.quality).toBe(8);
-  })
-
-  it('deprecates the quality of a conjured item by 4 when sell-in <0', () => {
-    const conjuredItem = new Item('Conjured fire scroll', 0, 10);
-    updateItems([conjuredItem]);
-    expect(conjuredItem.quality).toBe(6);
-  });
-
-  it('does not lower quality of a conjured items below 0', () => {
-    const conjuredItem = new Item('Conjured fire scroll', 0, 0);
-    updateItems([conjuredItem]);
-    expect(conjuredItem.quality).toBe(0);
-  });
 });
