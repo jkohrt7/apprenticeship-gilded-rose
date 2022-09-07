@@ -23,10 +23,10 @@ updateQuality(items);
 */
 
 const qualityStrategies = {
-  "Aged Brie": item => Math.min(50, commonGetQuality(item, 1)),
+  "Aged Brie": item => Math.min(50, calcNextQuality(item, 1)),
   "Backstage passes to a TAFKAL80ETC concert": item => Math.min(50,getTicketQuality(item)),
   "Sulfuras, Hand of Ragnaros": item => item.quality,
-  "default": item => Math.max(0, commonGetQuality(item, -1))
+  "default": item => Math.max(0, calcNextQuality(item, -1))
 }
 
 function calcNextSellIn(item) {
@@ -36,20 +36,8 @@ function calcNextSellIn(item) {
   return item.sell_in;
 }
 
-function calcNextQuality(item) {
-  let strategyName;
-  if(item.name.startsWith("Conjured")) {
-    strategyName = "Conjured"
-  }
-  else {
-    strategyName = item.name;
-  }
-  let strategy = qualityStrategies[strategyName] || qualityStrategies["default"];
-  return strategy(item);
-}
-
 //Most items follow this logic, with just changed values.
-function commonGetQuality(item, change) {
+function calcNextQuality(item, change) {
   if(item.sell_in >= 0) {
     return item.quality + change;
   }
@@ -73,6 +61,8 @@ function getTicketQuality(item) {
 export function updateItems(items) {
   for (var i = 0; i < items.length; i++) {
     items[i].sell_in = calcNextSellIn(items[i]);
+
+    const calcNextQuality = qualityStrategies[item.name] || qualityStrategies["default"];
     items[i].quality = calcNextQuality(items[i]);
   }
 }
