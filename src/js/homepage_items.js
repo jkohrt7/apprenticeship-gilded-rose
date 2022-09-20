@@ -26,12 +26,36 @@ const renderItemsOnHomepage = (items) => {
   });
 };
 
-const bindEventListenToUpdateButton = (items) => {
+const getItemsFromStorage = () => {
+  const result = localStorage.getItem('inventory');
+  if (result) {
+    return JSON.parse(result);
+  }
+  return getNewItems();
+};
+
+const setItemstoStorage = (items) => {
+  const stringItems = JSON.stringify(items);
+  localStorage.setItem('inventory', stringItems);
+};
+
+const bindEventListenToUpdateButton = () => {
   const updateButton = document.getElementById('update-items-button');
   updateButton.addEventListener('click', (e) => {
     e.preventDefault();
-    updateItems(items);
-    renderItemsOnHomepage(items);
+    const newItems = updateItems(getItemsFromStorage());
+    console.log('Running...');
+    renderItemsOnHomepage(newItems);
+    setItemstoStorage(newItems);
+  });
+};
+
+const bindEventListenToResetButton = () => {
+  const updateButton = document.getElementById('reset-inventory-button');
+  updateButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    renderItemsOnHomepage(getNewItems());
+    setItemstoStorage(getNewItems());
   });
 };
 
@@ -39,6 +63,7 @@ const showItemsOnHomePage = () => {
   const items = getNewItems();
   renderItemsOnHomepage(items);
   bindEventListenToUpdateButton(items);
+  bindEventListenToResetButton(items);
 };
 
 showItemsOnHomePage();
